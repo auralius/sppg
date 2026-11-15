@@ -17,6 +17,8 @@ It can:
 
 ![SPPG setup](assets/sppg_setup.png)
 
+https://github.com/user-attachments/assets/85aef304-58bd-492b-8786-6c8ac44fdd6b
+
 ## Hardware
 
 ### Main board
