@@ -1,0 +1,206 @@
+{
+  "source": "peaknet_ppg.pt from user and ppg_peaknet notebook",
+  "status": "synthetic-QAT starter; NOT validated on annotated real pulse peaks",
+  "model": "six Conv1D, implemented as 1xK Conv2D, CHW",
+  "input_shape": [
+    1,
+    1,
+    256
+  ],
+  "output_shape": [
+    2,
+    1,
+    256
+  ],
+  "input_preprocess": "-raw IR; z score within each 256-sample window",
+  "output_semantics": "raw INT8 logits for systolic,diastolic; NO SIGMOID",
+  "input_scale": 0.023668389057549904,
+  "output_scale": 0.17998330424151082,
+  "calibration": [
+    {
+      "name": "input",
+      "p_abs": 2.5049045085906982,
+      "max_abs": 2.641683578491211,
+      "scale": 0.023668389057549904
+    },
+    {
+      "name": "conv1",
+      "p_abs": 2.144727945327759,
+      "max_abs": 2.8324248790740967,
+      "scale": 0.022748609265004556
+    },
+    {
+      "name": "conv2",
+      "p_abs": 1.9819327592849731,
+      "max_abs": 2.4847605228424072,
+      "scale": 0.019956344356687052
+    },
+    {
+      "name": "conv3",
+      "p_abs": 4.495701313018799,
+      "max_abs": 5.391613006591797,
+      "scale": 0.04330271863561916
+    },
+    {
+      "name": "conv4",
+      "p_abs": 11.247458457946777,
+      "max_abs": 13.084671020507812,
+      "scale": 0.10627519802784356
+    },
+    {
+      "name": "conv5",
+      "p_abs": 18.13392448425293,
+      "max_abs": 20.874073028564453,
+      "scale": 0.17134416835514577
+    },
+    {
+      "name": "conv6",
+      "p_abs": 19.048233032226562,
+      "max_abs": 20.536651611328125,
+      "scale": 0.17998330424151082
+    }
+  ],
+  "metrics": {
+    "fp32_checkpoint_testvector_max_error": 2.980232238769531e-07,
+    "fp32_synthetic_val_loss": 0.6899195294047511,
+    "qat_initial_synthetic_val_loss": 0.6924630303715551,
+    "qat_final_synthetic_val_loss": 0.6919303347898084,
+    "synthetic_train_windows": 2064,
+    "synthetic_validation_windows": 430,
+    "real_unlabelled_calibration_windows": 84,
+    "qat_epochs": 6,
+    "training_history": [
+      {
+        "epoch": 1,
+        "train_loss": 0.6593863335690757,
+        "val_loss": 0.6921257825784906
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.6583093219949293,
+        "val_loss": 0.6922411921412446
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.6588313233020694,
+        "val_loss": 0.6921114062154016
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.6584601046503052,
+        "val_loss": 0.692325084153996
+      },
+      {
+        "epoch": 5,
+        "train_loss": 0.6570540102877358,
+        "val_loss": 0.6920388091442197
+      },
+      {
+        "epoch": 6,
+        "train_loss": 0.657386718794357,
+        "val_loss": 0.6919303347898084
+      }
+    ]
+  },
+  "parameter_bytes": 10304,
+  "activation_estimate": "measure actual arena_bytes() using C++ host test",
+  "golden_names": [
+    "notebook_fp32_golden_input",
+    "real_SPPG_unlabelled_0",
+    "real_SPPG_unlabelled_1",
+    "synthetic_0",
+    "synthetic_1"
+  ],
+  "layers": [
+    {
+      "name": "conv1",
+      "weight_shape": [
+        8,
+        1,
+        15
+      ],
+      "weights": 120,
+      "outputs": 8,
+      "multiplier": 1154763140,
+      "shift": -7,
+      "weight_scale": 0.004037748171588567,
+      "input_scale": 0.023668389057549904,
+      "output_scale": 0.022748609265004556
+    },
+    {
+      "name": "conv2",
+      "weight_shape": [
+        16,
+        8,
+        15
+      ],
+      "weights": 1920,
+      "outputs": 16,
+      "multiplier": 2140849595,
+      "shift": -7,
+      "weight_scale": 0.006832387034348616,
+      "input_scale": 0.022748609265004556,
+      "output_scale": 0.019956344356687052
+    },
+    {
+      "name": "conv3",
+      "weight_shape": [
+        16,
+        16,
+        15
+      ],
+      "weights": 3840,
+      "outputs": 16,
+      "multiplier": 1573250513,
+      "shift": -8,
+      "weight_scale": 0.006209579978402205,
+      "input_scale": 0.019956344356687052,
+      "output_scale": 0.04330271863561916
+    },
+    {
+      "name": "conv4",
+      "weight_shape": [
+        16,
+        16,
+        15
+      ],
+      "weights": 3840,
+      "outputs": 16,
+      "multiplier": 1279140696,
+      "shift": -8,
+      "weight_scale": 0.005710383099833812,
+      "input_scale": 0.04330271863561916,
+      "output_scale": 0.10627519802784356
+    },
+    {
+      "name": "conv5",
+      "weight_shape": [
+        16,
+        16,
+        1
+      ],
+      "weights": 256,
+      "outputs": 16,
+      "multiplier": 1517340070,
+      "shift": -7,
+      "weight_scale": 0.008899805114025206,
+      "input_scale": 0.10627519802784356,
+      "output_scale": 0.17134416835514577
+    },
+    {
+      "name": "conv6",
+      "weight_shape": [
+        2,
+        16,
+        1
+      ],
+      "weights": 32,
+      "outputs": 2,
+      "multiplier": 1922921575,
+      "shift": -7,
+      "weight_scale": 0.00734826194958424,
+      "input_scale": 0.17134416835514577,
+      "output_scale": 0.17998330424151082
+    }
+  ]
+}
