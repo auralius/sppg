@@ -3,8 +3,9 @@
 // Acquisition: both RED and IR, 100 Hz, 411 us LED pulses, no hardware averaging.
 // Plot: RAW, 2nd-order Tustin Butterworth HPF, or HPF+LPF (unchanged).
 // BOOT GPIO0: capture 10s+ raw RED+IR to RAM, then CSV to microSD.
-// A pinned core-0 task runs Noodle2 INT8 PeakNet on inverted Tustin-filtered IR windows.
-// v17: lambda=0.50 PeakNet + cross-class temporal postprocessing.
+// A pinned core-0 task runs Noodle2 INT8 PeakNet on inverted RAW IR windows.
+// v18 display-only experiment: fixed 3.00s waveform pages + live NN marker updates.
+// Same frozen real-finetuned PeakNet and v17 temporal decoder.
 // NN uses RAW IR (display remains Tustin filtered); no retraining.
 // Live LCD/100Hz MAX30102 FIFO acquisition stays on Arduino core 1.
 
@@ -21,6 +22,7 @@
 #include "peaknet_live.h"
 #include "peaknet_segments.h"
 #include "peaknet_temporal.h"
+#include "ppg_paged_plot.h"
 #ifndef PPG_DIAG_MODE
 #define PPG_DIAG_MODE 0
 #endif
@@ -121,7 +123,9 @@ constexpr int SCREEN_W = 320;          // landscape setRotation(1)
 constexpr int SCREEN_H = 170;
 constexpr int PLOT_X = 8;
 constexpr int PLOT_Y = 50;
-constexpr int PLOT_W = SCREEN_W - 16; // 304 samples = 3.04 s @ 100 Hz
+constexpr int PLOT_W = SCREEN_W - 16; // 304 screen pixels
+constexpr int PLOT_PAGE_SAMPLES = SAMPLE_RATE_HZ * 3; // exactly 300 samples = 3.00 s
+static_assert(PLOT_PAGE_SAMPLES <= PLOT_W, "Page must fit on LCD");
 constexpr int PLOT_H = 98;
 constexpr float PI_F = 3.14159265358979323846f;
 constexpr size_t NN_EVENT_MEMORY = 32;
@@ -222,11 +226,12 @@ DCBlocker redBlocker;
 DCBlocker irBlocker;
 LowPass redLowPass;
 LowPass irLowPass;
-float history[PLOT_W] = {};
-// Frozen frame snapshot: sensor polling during TFT drawing must not move the trace.
-float plotSnapshot[PLOT_W] = {};
-size_t writeIndex = 0;
-size_t sampleCount = 0;
+// Three separate buffers: collecting, pending, and immutable visible page.
+// Crucial: FIFO servicing *inside* TFT redraw may finish the next page,
+// but cannot modify the page being drawn.
+PPGPagedPlot<PLOT_PAGE_SAMPLES> plotPages;
+uint32_t lastDrawnNNCompleted = UINT32_MAX;
+uint32_t lastDrawnPageVersion = UINT32_MAX;
 uint32_t latestRaw = 0;
 float latestAC = 0.0f;
 float latestFiltered = 0.0f;
@@ -616,8 +621,9 @@ void processSample(uint32_t red, uint32_t ir) {
     // Always compute both filtered channels; display mode does not alter CSV.
     const float redBand = redLowPass.apply(redAC);
     const float irBand = irLowPass.apply(irAC);
-    // Feed the continuously filtered IR, not a fresh filter reset per window.
-    // The recorded SD CSV still stores the original raw RED/IR samples.
+    // The NN remains RAW-IR based in the frozen baseline (config flag 0).
+    // Filtered IR is still available only for the optional comparison mode.
+    // The recorded SD CSV always stores original raw RED/IR samples.
     nnOnIR(ir, irBand, sampleIndex);
     (void)redBand; (void)irBand; // Retain both filters even with serial CSV disabled.
 #if defined(PLOT_RED)
@@ -631,15 +637,15 @@ void processSample(uint32_t red, uint32_t ir) {
 #endif
 
 #if PPG_LPF
-    history[writeIndex] = -latestFiltered;
+    const float plotValue = -latestFiltered;
 #elif PPG_HPF
-    history[writeIndex] = -latestAC;
+    const float plotValue = -latestAC;
 #else
-    history[writeIndex] = -static_cast<float>(latestRaw);
+    const float plotValue = -static_cast<float>(latestRaw);
 #endif
-
-    writeIndex = (writeIndex + 1) % PLOT_W;
-    if (sampleCount < PLOT_W) ++sampleCount;
+    // A complete, nonoverlapping 300-sample page is staged every 3.00 s.
+    // The NN continues to consume its original overlapping 256-sample windows.
+    plotPages.push(plotValue, sampleIndex);
 
 #if SERIAL_RAW
     // Avoid serial transmission while recording so 100Hz FIFO service stays prompt.
@@ -658,12 +664,6 @@ void processSample(uint32_t red, uint32_t ir) {
     }
 #endif
     ++sampleIndex;
-}
-
-void snapshotPlotHistory() {
-    const size_t start = (writeIndex + PLOT_W - sampleCount) % PLOT_W;
-    for (size_t i = 0; i < sampleCount; ++i)
-        plotSnapshot[i] = history[(start + i) % PLOT_W];
 }
 
 void drawHeader() {
@@ -689,9 +689,9 @@ void drawHeader() {
 }
 
 void drawWaveform() {
-    const size_t frameSamples = sampleCount;
-    const uint32_t frameNextSampleIndex=sampleIndex; // freeze marker mapping with trace
-    snapshotPlotHistory();
+    const size_t frameSamples = plotPages.ready() ? PLOT_PAGE_SAMPLES : 0;
+    const uint32_t frameStart = plotPages.firstSample(); // fixed for 3 seconds
+    const float *plotSnapshot = plotPages.samples();
     const uint32_t frameRaw = latestRaw;
     const float frameAC = latestAC;
     const float frameFiltered = latestFiltered;
@@ -719,6 +719,7 @@ void drawWaveform() {
     // Freeze the NN events against the SAME sample-index snapshot as the trace.
     // serviceSensor() below may append samples while SPI drawing is underway.
     uint8_t highlight[PLOT_W] = {};
+    unsigned pageSys=0, pageDia=0; // count only markers on this frozen page
 #if PPG_ENABLE_NN && !PPG_DIAG_MODE
     peaknet_live::Candidate ev[NN_EVENT_MEMORY] = {};
     size_t nev=0;
@@ -726,8 +727,6 @@ void drawWaveform() {
     nev=nnShared.eventCount;
     memcpy(ev,nnShared.events,nev*sizeof(ev[0]));
     portEXIT_CRITICAL(&nnGuard);
-    const uint32_t frameStart=frameNextSampleIndex>=frameSamples ?
-        frameNextSampleIndex-frameSamples : 0;
     peaknet_segments::build_highlight_mask(
         ev,nev,frameStart,frameSamples,highlight);
 #endif
@@ -756,7 +755,7 @@ void drawWaveform() {
     const float range = high - low;
     tft.drawFastHLine(PLOT_X, PLOT_Y + PLOT_H / 2, PLOT_W, TFT_DARKGREY);
 
-    const int xStart = PLOT_X + PLOT_W - static_cast<int>(frameSamples);
+    const int xStart = PLOT_X + (PLOT_W - PLOT_PAGE_SAMPLES) / 2;
     int lastX = 0;
     int lastY = 0;
     for (size_t i = 0; i < frameSamples; ++i) {
@@ -786,6 +785,7 @@ void drawWaveform() {
            ev[i].sample_idx>=frameStart+frameSamples) continue;
         const int x=xStart+int(ev[i].sample_idx-frameStart);
         const bool dia=ev[i].channel!=0;
+        if (dia) ++pageDia; else ++pageSys;
         const uint16_t col=dia?TFT_MAGENTA:TFT_YELLOW;
         const int yy=PLOT_Y+(dia?19:4);
         //tft.drawFastVLine(x,yy,8,col);
@@ -806,13 +806,13 @@ void drawWaveform() {
     tft.setTextFont(1);
     tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
 #if PPG_LPF
-    snprintf(line, sizeof(line), "HP+LP min:%+.0f max:%+.0f  ~3s",
+    snprintf(line, sizeof(line), "PAGE 3s min:%+.0f max:%+.0f",
              static_cast<double>(minimum), static_cast<double>(maximum));
 #elif PPG_HPF
-    snprintf(line, sizeof(line), "AC min:%+.0f max:%+.0f    ~3.0s",
+    snprintf(line, sizeof(line), "PAGE 3s min:%+.0f max:%+.0f",
              static_cast<double>(minimum), static_cast<double>(maximum));
 #else
-    snprintf(line, sizeof(line), "Raw min:%.0f max:%.0f   ~3.0s",
+    snprintf(line, sizeof(line), "PAGE 3s min:%.0f max:%.0f",
              static_cast<double>(minimum), static_cast<double>(maximum));
 #endif
     if (captureState == CaptureState::Recording) {
@@ -831,11 +831,10 @@ void drawWaveform() {
     } else {
 #if PPG_ENABLE_NN
         uint32_t lastUs=0,completed=0;
-        uint8_t sys=0,dia=0,rej=0;
+        uint8_t rej=0;
         int error=0;
         portENTER_CRITICAL(&nnGuard);
         lastUs=nnShared.inferenceUs;completed=nnShared.completed;
-        sys=nnShared.candidatesSys;dia=nnShared.candidatesDia;
         rej=nnShared.rejectedD;
         error=nnShared.errorCode;
         portEXIT_CRITICAL(&nnGuard);
@@ -846,9 +845,9 @@ void drawWaveform() {
             snprintf(line,sizeof(line),"DIAG %d NN %lums",int(PPG_DIAG_MODE),
                      (unsigned long)(lastUs/1000u));
 #else
-            snprintf(line,sizeof(line),"NN %lums S?%u D?%u rejectD%u",
-                (unsigned long)(lastUs/1000u),unsigned(sys),unsigned(dia),
-                unsigned(rej));
+            snprintf(line,sizeof(line),"P%lu S?%u D?%u NN%lums rD%u",
+                (unsigned long)plotPages.pageNumber(),pageSys,pageDia,
+                (unsigned long)(lastUs/1000u),unsigned(rej));
 #endif
         }
         else
@@ -988,10 +987,16 @@ void finishCaptureAndSave() {
     irBlocker.configure(SAMPLE_RATE_HZ, PPG_HPF_CUTOFF_HZ);
     redLowPass.configure(SAMPLE_RATE_HZ, PPG_LPF_CUTOFF_HZ);
     irLowPass.configure(SAMPLE_RATE_HZ, PPG_LPF_CUTOFF_HZ);
-    writeIndex = sampleCount = 0;
+    plotPages.reset(); // Restart the 3s page after sensor pause; never bridge gaps.
+    lastDrawnNNCompleted = UINT32_MAX;
+    lastDrawnPageVersion = UINT32_MAX;
     latestRaw = 0;
     latestAC = latestFiltered = 0.0f;
     captureState = CaptureState::Idle;
+    if (DIAG_LCD_ON) {
+        drawHeader(); // remove pre-pause waveform and begin a fresh page
+        drawCaptureStatus(recordingStatus[0] ? recordingStatus : "Collecting 3s waveform...");
+    }
 }
 
 void haltWithSensorError() {
@@ -1123,6 +1128,7 @@ void setup() {
     Serial.printf("# filters TUSTIN_BUTTERWORTH2 fs=%dHz HPF=%.3fHz LPF=%.3fHz\n",
                   SAMPLE_RATE_HZ, static_cast<double>(PPG_HPF_CUTOFF_HZ),
                   static_cast<double>(PPG_LPF_CUTOFF_HZ));
+    Serial.println("# LCD mode=fixed_300_samples/3.00s; prediction markers update on inference completion");
     Serial.printf("# NN input=%s (IR; independent of display selection)\n",
                   PPG_NN_FILTERED_INPUT ? "Tustin HPF+LPF -> inverted zscore INT8"
                                         : "RAW IR -> inverted zscore INT8");
@@ -1141,6 +1147,8 @@ void setup() {
     Serial.printf("# RAM capture buffer: %u bytes; BOOT GPIO0 records %ds raw RED+IR\n",
                   static_cast<unsigned>(sizeof(recorded)), PPG_RECORD_SECONDS);
     nnReady=startNN();
+    if (DIAG_LCD_ON && !PPG_DIAG_MODE)
+        drawCaptureStatus("Collecting 3s waveform...");
     Serial.printf("# free_heap_after_nn=%u bytes\n",unsigned(ESP.getFreeHeap()));
 }
 
@@ -1170,6 +1178,7 @@ void loop() {
     // Fixed-interval controlled experiments; BOOT/SD writing deliberately off.
     if (DIAG_SENSOR_ON) serviceSensor();
     diagSubmitWindow();
+    if (DIAG_LCD_ON && plotPages.publish()) { /* publish after sampling, never inside TFT draw */ }
     if (DIAG_LCD_ON && millis()-lastRefresh>=REFRESH_MS) {
         lastRefresh=millis();
         drawWaveform(); // same full TFT waveform drawing as normal SPPG
@@ -1185,16 +1194,42 @@ void loop() {
         return;
     }
 
-    // During capture draw ~7 FPS; normal mode retains the existing ~13 FPS.
-    // The plot renders from a snapshot, while sensor polling is interleaved
-    // between short bursts of TFT drawing (see drawWaveform()).
+    // The waveform changes only when a 300-sample page finishes (3.00 s).
+    // Inference still runs independently every 128 samples; only the markers
+    // are redrawn when new NN results arrive. No horizontal scrolling.
+    // publish() is deliberately outside drawWaveform(): FIFO polling during
+    // drawing may stage the next page without changing its current samples.
+    (void)plotPages.publish();
     const unsigned long now = millis();
     const unsigned long refreshInterval =
         captureState == CaptureState::Recording ? RECORD_REFRESH_MS : REFRESH_MS;
     if (now - lastRefresh >= refreshInterval) {
         lastRefresh = now;
-        drawWaveform();
-        // Serial diagnostics only after recording, avoiding serial I/O stalls.
+        uint32_t nnCompleted = 0;
+#if PPG_ENABLE_NN
+        portENTER_CRITICAL(&nnGuard);
+        nnCompleted = nnShared.completed;
+        portEXIT_CRITICAL(&nnGuard);
+#endif
+        // A pending NN completion means the displayed page may have gained
+        // (or lost) an S?/D? through v17 cross-window temporal reconciliation.
+        if (plotPages.ready() && (plotPages.pageNumber() != lastDrawnPageVersion ||
+                                  nnCompleted != lastDrawnNNCompleted)) {
+            const uint32_t pageVersion = plotPages.pageNumber();
+            drawWaveform();
+            lastDrawnNNCompleted = nnCompleted;
+            lastDrawnPageVersion = pageVersion;
+        }
+        // Update the REC counter without repeatedly erasing a static plot.
+        if (captureState == CaptureState::Recording) {
+            const unsigned seconds = static_cast<unsigned>(
+                recordedCount ? (recordedCount - 1) / SAMPLE_RATE_HZ : 0);
+            char msg[44];
+            snprintf(msg, sizeof(msg), "REC %u/%ds  %u/%u samples",
+                     seconds, PPG_RECORD_SECONDS, unsigned(recordedCount),
+                     unsigned(RECORD_SAMPLE_COUNT));
+            drawCaptureStatus(msg);
+        }
         if (captureState == CaptureState::Idle && longFifoBursts) {
             Serial.printf("# WARNING FIFO bursts >=4: %lu (possible lost samples)\n",
                           static_cast<unsigned long>(longFifoBursts));
