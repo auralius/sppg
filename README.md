@@ -17,7 +17,7 @@ It can:
 
 ![SPPG setup](assets/sppg_setup.png)
 
-https://github.com/user-attachments/assets/85aef304-58bd-492b-8786-6c8ac44fdd6b
+https://github.com/user-attachments/assets/a6d0cf26-5b67-4a07-a3ce-b883c2bfbba3
 
 ## Hardware
 
