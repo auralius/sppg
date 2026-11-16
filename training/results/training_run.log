@@ -1,0 +1,7 @@
+REAL full-recording heldout= [np.str_('PPG0001.CSV'), np.str_('PPG0022.CSV'), np.str_('PPG0002.CSV'), np.str_('PPG0010.CSV'), np.str_('PPG0007.CSV')]
+Data: synthetic= 1800 real train= 126 real holdout= 35 total repeated= 2304
+BASELINE real {'windows': 35, 'weighted_bce': 0.45177003741264343, 'overlap': 0.06537079066038132, 'S_masked_BCE': np.float64(0.5515011874112216), 'D_masked_BCE': np.float64(0.3382829139972555), 'S_supervised_windows': 33, 'D_supervised_windows': 29} synthetic {'windows': 600, 'weighted_bce': 0.5610134387016297, 'overlap': 0.03410404324531555, 'S_masked_BCE': np.float64(0.5241802803675334), 'D_masked_BCE': np.float64(0.5978466192881267), 'S_supervised_windows': 600, 'D_supervised_windows': 600}
+EPOCH 1 train 0.57946 real D BCE 0.29771 real S BCE 0.52579 synth BCE 0.56357 sec 0.9
+EPOCH 2 train 0.57667 real D BCE 0.28704 real S BCE 0.50904 synth BCE 0.56254 sec 0.9
+EPOCH 3 train 0.57498 real D BCE 0.27952 real S BCE 0.50288 synth BCE 0.56247 sec 0.8
+DONE parameter_bytes 10304

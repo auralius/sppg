@@ -3,7 +3,9 @@
 // Acquisition: both RED and IR, 100 Hz, 411 us LED pulses, no hardware averaging.
 // Plot: RAW, 2nd-order Tustin Butterworth HPF, or HPF+LPF (unchanged).
 // BOOT GPIO0: capture 10s+ raw RED+IR to RAM, then CSV to microSD.
-// A pinned core-0 task runs Noodle2 INT8 PeakNet on inverted RAW IR windows.
+// A pinned core-0 task runs Noodle2 INT8 PeakNet on inverted Tustin-filtered IR windows.
+// v17: lambda=0.50 PeakNet + cross-class temporal postprocessing.
+// NN uses RAW IR (display remains Tustin filtered); no retraining.
 // Live LCD/100Hz MAX30102 FIFO acquisition stays on Arduino core 1.
 
 #include <Arduino.h>
@@ -17,6 +19,8 @@
 #include <Noodle2.h>
 #include "peaknet_model_flash.h"
 #include "peaknet_live.h"
+#include "peaknet_segments.h"
+#include "peaknet_temporal.h"
 #ifndef PPG_DIAG_MODE
 #define PPG_DIAG_MODE 0
 #endif
@@ -65,6 +69,22 @@
 #endif
 #ifndef PPG_ENABLE_NN
 #define PPG_ENABLE_NN 1
+#endif
+// A/B comparison without changing model weights or Noodle2 kernels:
+// 1: continuous Tustin HPF+LPF IR -> invert -> per-window z-score -> INT8
+// 0: original RAW IR -> invert -> per-window z-score -> INT8
+#ifndef PPG_NN_FILTERED_INPUT
+#define PPG_NN_FILTERED_INPUT 0
+#endif
+#if PPG_NN_FILTERED_INPUT != 0 && PPG_NN_FILTERED_INPUT != 1
+#error "PPG_NN_FILTERED_INPUT must be 0 or 1"
+#endif
+// 8 samples at 100 Hz = 80 ms. Set to 0 to disable S/D suppression.
+#ifndef PPG_CROSS_CLASS_GUARD_SAMPLES
+#define PPG_CROSS_CLASS_GUARD_SAMPLES 8
+#endif
+#if PPG_CROSS_CLASS_GUARD_SAMPLES < 0 || PPG_CROSS_CLASS_GUARD_SAMPLES > 50
+#error "PPG_CROSS_CLASS_GUARD_SAMPLES must be in [0,50]"
 #endif
 #ifndef PPG_RECORD_SECONDS
 #define PPG_RECORD_SECONDS 10
@@ -128,6 +148,8 @@ constexpr uint16_t TRACE_COLOR = TFT_RED;
 constexpr const char *CHANNEL_NAME = "IR";
 constexpr uint16_t TRACE_COLOR = TFT_CYAN;
 #endif
+// Highlight only the displayed line between a matched S? and later D?.
+constexpr uint16_t SD_SEGMENT_COLOR = TFT_RED;
 
 TFT_eSPI tft;
 MAX30105 sensor;
@@ -211,14 +233,48 @@ float latestFiltered = 0.0f;
 uint32_t sampleIndex = 0;
 uint32_t longFifoBursts = 0;
 unsigned long lastRefresh = 0;
-// Separate, latest-only inference stream. The task receives a 256-sample
-// RAW IR snapshot. It never touches the I2C sensor, TFT, SD or Tustin filters.
+// Separate, latest-only inference stream. Core 1 runs the continuous Tustin
+// filter once per sample; core 0 only normalizes and infers a frozen window.
+// Keep raw IR for the existing signal/contact gate (stddev >= 10 ADC counts).
 struct NNWindow {
+#if PPG_NN_FILTERED_INPUT
+    float ir[peaknet_live::WINDOW];
+    float rawStd;
+#else
     uint32_t ir[peaknet_live::WINDOW];
+#endif
     uint32_t startSample;
     uint32_t generation;
 };
 static uint32_t nnRawRing[peaknet_live::WINDOW] = {};
+#if PPG_NN_FILTERED_INPUT
+static float nnFilteredRing[peaknet_live::WINDOW] = {};
+
+// The HPF+LPF output has the same polarity as raw IR AC, so invert it here.
+// Match quantize_ir() rounding, saturation and per-window population z-score.
+void nnQuantizeFilteredIR(const float *ir, float inputScale, int8_t *dst,
+                          float *standardDeviation) {
+    double mean = 0.0;
+    for (size_t i = 0; i < peaknet_live::WINDOW; ++i)
+        mean += double(ir[i]);
+    mean /= double(peaknet_live::WINDOW);
+    double variance = 0.0;
+    for (size_t i = 0; i < peaknet_live::WINDOW; ++i) {
+        const double d = double(ir[i]) - mean;
+        variance += d * d;
+    }
+    const double sd = sqrt(variance / double(peaknet_live::WINDOW));
+    if (standardDeviation) *standardDeviation = float(sd);
+    const double denominator = sd + 1.e-9;
+    for (size_t i = 0; i < peaknet_live::WINDOW; ++i) {
+        const float z = float((mean - double(ir[i])) / denominator);
+        const double scaled = double(z) / double(inputScale);
+        const double rounded = copysign(floor(fabs(scaled) + 0.5), scaled);
+        dst[i] = int8_t(rounded > 127.0 ? 127 :
+                        (rounded < -128.0 ? -128 : int(rounded)));
+    }
+}
+#endif
 static uint16_t nnRingWrite = 0;
 static uint32_t nnSamplesSinceReset = 0;
 static QueueHandle_t nnQueue = nullptr;
@@ -233,9 +289,16 @@ struct NNShared {
     uint32_t overwritten = 0;
     uint32_t inferenceUs = 0;
     uint32_t lastInputStart = 0;
-    uint8_t candidatesSys = 0;
-    uint8_t candidatesDia = 0;
+    uint8_t candidatesSys = 0;   // kept in most recent decoded region
+    uint8_t candidatesDia = 0;   // kept in most recent decoded region
+    uint8_t rawCandidatesSys = 0;
+    uint8_t rawCandidatesDia = 0;
+    uint8_t rejectedD = 0;       // in most recent decoded region
     int errorCode = 0;
+    // Preserve a rolling log of ORIGINAL candidates. This makes the
+    // postprocessing reversible and permits cross-window reconciliation.
+    size_t rawEventCount = 0;
+    peaknet_live::Candidate rawEvents[NN_EVENT_MEMORY] = {};
     size_t eventCount = 0;
     peaknet_live::Candidate events[NN_EVENT_MEMORY] = {};
 };
@@ -246,7 +309,10 @@ void nnInvalidate() {
     if (!nnReady) return;
     portENTER_CRITICAL(&nnGuard);
     ++nnGeneration; // Any still-running window becomes stale.
+    nnShared.rawEventCount = 0;
     nnShared.eventCount = 0;
+    nnShared.rejectedD = 0;
+    nnShared.rawCandidatesSys = nnShared.rawCandidatesDia = 0;
     nnShared.inferenceUs = 0;
     nnShared.completed = 0;
     nnShared.candidatesSys = nnShared.candidatesDia = 0;
@@ -257,24 +323,49 @@ void nnInvalidate() {
 #endif
 }
 
-void nnOnRawIR(uint32_t rawIr, uint32_t globalSampleIndex) {
+void nnOnIR(uint32_t rawIr, float filteredIr, uint32_t globalSampleIndex) {
 #if PPG_ENABLE_NN
 #if PPG_DIAG_MODE
-    // In tests A-D the queue is paced by loop(); the sensor still works in B/C.
-    // For comparable NN workloads all four modes use golden input[0].
-    (void)rawIr; (void)globalSampleIndex;
+    // Diagnostics use the same fixed golden INT8 vector in all modes.
+    (void)rawIr; (void)filteredIr; (void)globalSampleIndex;
     return;
 #endif
     if(!nnReady || !nnQueue) return;
     nnRawRing[nnRingWrite] = rawIr;
+#if PPG_NN_FILTERED_INPUT
+    nnFilteredRing[nnRingWrite] = filteredIr;
+#else
+    (void)filteredIr;
+#endif
     nnRingWrite = uint16_t((nnRingWrite+1u) % peaknet_live::WINDOW);
     ++nnSamplesSinceReset;
     if(nnSamplesSinceReset < peaknet_live::WINDOW ||
       ((nnSamplesSinceReset-peaknet_live::WINDOW) % peaknet_live::HOP)!=0)
         return;
     NNWindow window = {};
+#if PPG_NN_FILTERED_INPUT
+    // Preserve original RAW-ADC standard-deviation contact check, even though
+    // the neural network now receives the filtered waveform. Calculated only
+    // once every 128 samples (~1.28 s), not in the 100 Hz acquisition loop.
+    double mean = 0.0;
     for(size_t i=0;i<peaknet_live::WINDOW;i++)
-        window.ir[i]=nnRawRing[(nnRingWrite+i) % peaknet_live::WINDOW];
+        mean += double(nnRawRing[i]);
+    mean /= double(peaknet_live::WINDOW);
+    double variance = 0.0;
+    for(size_t i=0;i<peaknet_live::WINDOW;i++) {
+        const double d = double(nnRawRing[i]) - mean;
+        variance += d*d;
+    }
+    window.rawStd = float(sqrt(variance / double(peaknet_live::WINDOW)));
+#endif
+    for(size_t i=0;i<peaknet_live::WINDOW;i++) {
+        const size_t idx=(nnRingWrite+i) % peaknet_live::WINDOW;
+#if PPG_NN_FILTERED_INPUT
+        window.ir[i]=nnFilteredRing[idx];
+#else
+        window.ir[i]=nnRawRing[idx];
+#endif
+    }
     window.startSample=globalSampleIndex-(peaknet_live::WINDOW-1);
     const bool overwriting=uxQueueMessagesWaiting(nnQueue)>0;
     portENTER_CRITICAL(&nnGuard);
@@ -282,10 +373,9 @@ void nnOnRawIR(uint32_t rawIr, uint32_t globalSampleIndex) {
     nnShared.enqueued++;
     if(overwriting) nnShared.overwritten++;
     portEXIT_CRITICAL(&nnGuard);
-    // xQueueOverwrite on a queue of length one replaces stale queued work.
     (void)xQueueOverwrite(nnQueue,&window);
 #else
-    (void)rawIr;(void)globalSampleIndex;
+    (void)rawIr; (void)filteredIr; (void)globalSampleIndex;
 #endif
 }
 
@@ -312,15 +402,21 @@ void nnTask(void*) {
     uint32_t windows = 0;
     for(;;) {
         if(xQueueReceive(nnQueue,&window,portMAX_DELAY)!=pdTRUE) continue;
-        // RAW IR is inverted and z-scored INDEPENDENTLY per window, exactly
-        // as in the Python training data; do not feed Tustin display output.
+        // Both input paths retain the original per-window inverted z-score.
         float rawStd=0;
+        float inputStd=0;
 #if PPG_DIAG_MODE
         // The exact same INT8 vector in A, B, C and D; no I2C/input variability.
         memcpy(input,peaknet_golden::input[0],sizeof(input));
+#elif PPG_NN_FILTERED_INPUT
+        rawStd=window.rawStd;
+        if(rawStd < 10.0f) continue; // Original RAW-ADC contact gate.
+        nnQuantizeFilteredIR(window.ir,peaknet_ppg::input_scale,input,&inputStd);
+        if(inputStd < 1.e-6f) continue; // No AC content after filtering.
 #else
         peaknet_live::quantize_ir(window.ir,peaknet_ppg::input_scale,input,&rawStd);
-        if(rawStd < 10.0f) continue; // No plausible contact signal; not physiology.
+        inputStd=rawStd;
+        if(rawStd < 10.0f) continue; // Original RAW-ADC contact gate.
 #endif
         noodle2::Status st=nnGraph.set_input(input);
         if(st!=noodle2::OK) {
@@ -349,38 +445,48 @@ void nnTask(void*) {
         for(size_t i=0;i<foundCount;i++) (found[i].channel?foundD:foundS)++;
         bool accepted=false;
         uint32_t overwrittenAtWindow=0;
+        uint8_t keptS=0,keptD=0,removedD=0;
         portENTER_CRITICAL(&nnGuard);
         if(window.generation==nnGeneration) {
             nnShared.completed++;
             nnShared.inferenceUs=elapsedUs;
             nnShared.lastInputStart=window.startSample;
-            nnShared.candidatesSys=foundS;
-            nnShared.candidatesDia=foundD;
+            nnShared.rawCandidatesSys=foundS;
+            nnShared.rawCandidatesDia=foundD;
             nnShared.errorCode=0;
             overwrittenAtWindow=nnShared.overwritten;
-            // Event memory is intentionally a small rolling log for the LCD.
+            // Merge into the ORIGINAL event log, using the v15 same-class
+            // deduplication algorithm. Never permanently delete raw peaks.
             for(size_t i=0;i<foundCount;i++) {
-                // Merge nearly coincident candidates across hop boundaries.
-                // The two classes are handled independently.
-                bool duplicate=false;
-                for(size_t j=nnShared.eventCount;j>0;j--) {
-                    peaknet_live::Candidate &old=nnShared.events[j-1];
-                    if(old.channel!=found[i].channel) continue;
-                    if(found[i].sample_idx>=old.sample_idx &&
-                       found[i].sample_idx-old.sample_idx<peaknet_live::MIN_SEPARATION) {
-                        if(found[i].logit>old.logit) old=found[i];
-                        duplicate=true;
-                    }
-                    break;
-                }
-                if(duplicate) continue;
-                if(nnShared.eventCount==NN_EVENT_MEMORY) {
-                    memmove(nnShared.events,nnShared.events+1,
-                        sizeof(nnShared.events[0])*(NN_EVENT_MEMORY-1));
-                    nnShared.eventCount--;
-                }
-                nnShared.events[nnShared.eventCount++]=found[i];
+                peaknet_temporal::append_merged(
+                    nnShared.rawEvents,nnShared.rawEventCount,NN_EVENT_MEMORY,found[i]);
             }
+            // Rebuild the displayed event list after each inference. This
+            // also resolves S/D overlaps that straddle two 128-hop windows:
+            // a later S may invalidate an earlier D in the rolling log.
+            nnShared.eventCount=peaknet_temporal::exclude_near_s(
+                nnShared.rawEvents,nnShared.rawEventCount,
+                nnShared.events,NN_EVENT_MEMORY,PPG_CROSS_CLASS_GUARD_SAMPLES);
+            // Show counts for the latest *decoded* 128-sample region only.
+            const uint32_t regionStart=window.startSample+peaknet_live::FIRST_DECODE;
+            const uint32_t regionEnd=window.startSample+peaknet_live::LAST_DECODE_EXCLUSIVE;
+            uint8_t countKeptS=0,countKeptD=0,rawD=0;
+            for(size_t i=0;i<nnShared.eventCount;i++) {
+                const peaknet_live::Candidate &ev=nnShared.events[i];
+                if(ev.sample_idx<regionStart || ev.sample_idx>=regionEnd) continue;
+                if(ev.channel) ++countKeptD; else ++countKeptS;
+            }
+            for(size_t i=0;i<nnShared.rawEventCount;i++) {
+                const peaknet_live::Candidate &ev=nnShared.rawEvents[i];
+                if(ev.channel && ev.sample_idx>=regionStart && ev.sample_idx<regionEnd)
+                    ++rawD;
+            }
+            nnShared.candidatesSys=countKeptS;
+            nnShared.candidatesDia=countKeptD;
+            nnShared.rejectedD=(rawD>countKeptD) ? uint8_t(rawD-countKeptD) : 0;
+            keptS=nnShared.candidatesSys;
+            keptD=nnShared.candidatesDia;
+            removedD=nnShared.rejectedD;
             accepted=true;
         }
         portEXIT_CRITICAL(&nnGuard);
@@ -413,10 +519,13 @@ void nnTask(void*) {
                 (unsigned long)nodeUs[3],(unsigned long)nodeUs[4],
                 (unsigned long)nodeUs[5],(unsigned long)nodeUs[6]);
 #else
-            Serial.printf("# NN win=%lu t=%luus S?=%u D?=%u raw_std=%.1f tile=%u drop=%lu "
+            Serial.printf("# NN win=%lu t=%luus rawS=%u rawD=%u keptS=%u keptD=%u rejectD=%u guard=%u "
+                "raw_std=%.1f nn_std=%.1f tile=%u drop=%lu "
                 "L1=%lu L2=%lu L3=%lu L4=%lu L5=%lu L6=%lu\n",
                 (unsigned long)windows,(unsigned long)elapsedUs,
-                unsigned(foundS),unsigned(foundD),double(rawStd),unsigned(PPG_NN_CONV_TILE),
+                unsigned(foundS),unsigned(foundD),unsigned(keptS),unsigned(keptD),
+                unsigned(removedD),unsigned(PPG_CROSS_CLASS_GUARD_SAMPLES),
+                double(rawStd),double(inputStd),unsigned(PPG_NN_CONV_TILE),
                 (unsigned long)overwrittenAtWindow,
                 (unsigned long)nodeUs[1],(unsigned long)nodeUs[2],
                 (unsigned long)nodeUs[3],(unsigned long)nodeUs[4],
@@ -464,11 +573,16 @@ bool startNN() {
         Serial.println("# NN task allocation FAILED");
         vQueueDelete(nnQueue);nnQueue=nullptr;return false;
     }
+    Serial.println("# SPPG_MODEL=PeakNet_v15_overlap_lambda_050_QAT + temporal_guard");
+    Serial.printf("# NN temporal_guard=%u samples (%.0f ms at 100Hz); keep raw events in RAM\n",
+                  unsigned(PPG_CROSS_CLASS_GUARD_SAMPLES),
+                  double(PPG_CROSS_CLASS_GUARD_SAMPLES*1000.0f/SAMPLE_RATE_HZ));
     Serial.printf("# NN started core%d arena=%u params=%u nodes=%u hop=%u "
                   "input=%s tile=%u\n",int(NN_WORKER_CORE),unsigned(nnGraph.arena_bytes()),
                   unsigned(peaknet_ppg::parameter_bytes),unsigned(nnGraph.node_count()),
                   unsigned(peaknet_live::HOP),
-                  PPG_DIAG_MODE ? "golden_fixed" : "-rawIR/zscore",
+                   PPG_DIAG_MODE ? "golden_fixed" :
+                       (PPG_NN_FILTERED_INPUT ? "-filteredIR/zscore" : "-rawIR/zscore"),
                   unsigned(PPG_NN_CONV_TILE));
     return true;
 #else
@@ -497,12 +611,14 @@ void captureRawSample(uint32_t red, uint32_t ir) {
 void processSample(uint32_t red, uint32_t ir) {
     // Store original ADC readings before any HPF/LPF processing.
     captureRawSample(red, ir);
-    nnOnRawIR(ir, sampleIndex);
     const float redAC = redBlocker.apply(red);
     const float irAC = irBlocker.apply(ir);
     // Always compute both filtered channels; display mode does not alter CSV.
     const float redBand = redLowPass.apply(redAC);
     const float irBand = irLowPass.apply(irAC);
+    // Feed the continuously filtered IR, not a fresh filter reset per window.
+    // The recorded SD CSV still stores the original raw RED/IR samples.
+    nnOnIR(ir, irBand, sampleIndex);
     (void)redBand; (void)irBand; // Retain both filters even with serial CSV disabled.
 #if defined(PLOT_RED)
     latestRaw = red;
@@ -600,6 +716,22 @@ void drawWaveform() {
     tft.drawFastHLine(PLOT_X, PLOT_Y + PLOT_H - 1, PLOT_W, TFT_DARKGREY);
     if (!frameSamples) return;
 
+    // Freeze the NN events against the SAME sample-index snapshot as the trace.
+    // serviceSensor() below may append samples while SPI drawing is underway.
+    uint8_t highlight[PLOT_W] = {};
+#if PPG_ENABLE_NN && !PPG_DIAG_MODE
+    peaknet_live::Candidate ev[NN_EVENT_MEMORY] = {};
+    size_t nev=0;
+    portENTER_CRITICAL(&nnGuard);
+    nev=nnShared.eventCount;
+    memcpy(ev,nnShared.events,nev*sizeof(ev[0]));
+    portEXIT_CRITICAL(&nnGuard);
+    const uint32_t frameStart=frameNextSampleIndex>=frameSamples ?
+        frameNextSampleIndex-frameSamples : 0;
+    peaknet_segments::build_highlight_mask(
+        ev,nev,frameStart,frameSamples,highlight);
+#endif
+
     float minimum = plotSnapshot[0];
     float maximum = minimum;
     for (size_t i = 1; i < frameSamples; ++i) {
@@ -638,7 +770,8 @@ void drawWaveform() {
         if (yNormalized > 1.0f) yNormalized = 1.0f;
         const int y = PLOT_Y + PLOT_H - 3 -
                       static_cast<int>(yNormalized * (PLOT_H - 5));
-        if (i) tft.drawLine(lastX, lastY, x, y, TRACE_COLOR);
+        if (i) tft.drawLine(lastX, lastY, x, y,
+                            highlight[i] ? SD_SEGMENT_COLOR : TRACE_COLOR);
         lastX = x;
         lastY = y;
     }
@@ -648,14 +781,6 @@ void drawWaveform() {
 #if PPG_ENABLE_NN && !PPG_DIAG_MODE
     // Prediction markers arrive after ~1s inference; S?/D? are tentative
     // classes, NOT validated systolic/diastolic landmarks on real PPG.
-    peaknet_live::Candidate ev[NN_EVENT_MEMORY] = {};
-    size_t nev=0;
-    portENTER_CRITICAL(&nnGuard);
-    nev=nnShared.eventCount;
-    memcpy(ev,nnShared.events,nev*sizeof(ev[0]));
-    portEXIT_CRITICAL(&nnGuard);
-    const uint32_t frameStart=frameNextSampleIndex>=frameSamples ?
-        frameNextSampleIndex-frameSamples : 0;
     for(size_t i=0;i<nev;i++) {
         if(ev[i].sample_idx<frameStart ||
            ev[i].sample_idx>=frameStart+frameSamples) continue;
@@ -663,7 +788,7 @@ void drawWaveform() {
         const bool dia=ev[i].channel!=0;
         const uint16_t col=dia?TFT_MAGENTA:TFT_YELLOW;
         const int yy=PLOT_Y+(dia?19:4);
-        tft.drawFastVLine(x,yy,8,col);
+        //tft.drawFastVLine(x,yy,8,col);
         tft.setTextFont(1);
         tft.setTextColor(col,TFT_BLACK);
         // Font 1 is 6 pixels wide per character at text size 1.
@@ -705,13 +830,13 @@ void drawWaveform() {
         tft.drawString(recordingStatus, 8, 157);
     } else {
 #if PPG_ENABLE_NN
-        uint32_t lastUs=0,completed=0,dropped=0;
-        uint8_t sys=0,dia=0;
+        uint32_t lastUs=0,completed=0;
+        uint8_t sys=0,dia=0,rej=0;
         int error=0;
         portENTER_CRITICAL(&nnGuard);
         lastUs=nnShared.inferenceUs;completed=nnShared.completed;
-        dropped=nnShared.overwritten;
         sys=nnShared.candidatesSys;dia=nnShared.candidatesDia;
+        rej=nnShared.rejectedD;
         error=nnShared.errorCode;
         portEXIT_CRITICAL(&nnGuard);
         if(error)
@@ -721,9 +846,9 @@ void drawWaveform() {
             snprintf(line,sizeof(line),"DIAG %d NN %lums",int(PPG_DIAG_MODE),
                      (unsigned long)(lastUs/1000u));
 #else
-            snprintf(line,sizeof(line),"NN %lums S?%u D?%u drop%lu",
+            snprintf(line,sizeof(line),"NN %lums S?%u D?%u rejectD%u",
                 (unsigned long)(lastUs/1000u),unsigned(sys),unsigned(dia),
-                (unsigned long)dropped);
+                unsigned(rej));
 #endif
         }
         else
@@ -998,6 +1123,9 @@ void setup() {
     Serial.printf("# filters TUSTIN_BUTTERWORTH2 fs=%dHz HPF=%.3fHz LPF=%.3fHz\n",
                   SAMPLE_RATE_HZ, static_cast<double>(PPG_HPF_CUTOFF_HZ),
                   static_cast<double>(PPG_LPF_CUTOFF_HZ));
+    Serial.printf("# NN input=%s (IR; independent of display selection)\n",
+                  PPG_NN_FILTERED_INPUT ? "Tustin HPF+LPF -> inverted zscore INT8"
+                                        : "RAW IR -> inverted zscore INT8");
     if (DIAG_SENSOR_ON) printSensorRegisters();
     if (DIAG_LCD_ON) {
         drawHeader();

@@ -1,0 +1,1475 @@
+{
+  "schema": "SPPG_real_manual_review_v1",
+  "source_input_sha256": "a6d3645fd6658e5d0386c71a1c47ce9b4bd56320dd2490ad45a87569a3539dc7",
+  "sample_rate_hz": 100,
+  "decisions": {
+    "PPG0001.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0001_b01": {
+          "dn_confirmed": 26,
+          "d_confirmed": null,
+          "d_status": "shoulder",
+          "s_reviewed": false
+        },
+        "PPG0001_b02": {
+          "d_confirmed": null,
+          "d_status": "shoulder",
+          "dn_confirmed": 133
+        },
+        "PPG0001_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 243
+        },
+        "PPG0001_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 345
+        },
+        "PPG0001_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 455
+        },
+        "PPG0001_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 558
+        },
+        "PPG0001_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 664
+        },
+        "PPG0001_b08": {
+          "d_status": "distinct",
+          "d_confirmed": 772,
+          "dn_confirmed": 767
+        },
+        "PPG0001_b09": {
+          "dn_confirmed": 869,
+          "d_confirmed": 875,
+          "d_status": "distinct"
+        },
+        "PPG0001_b10": {
+          "d_confirmed": 983,
+          "d_status": "distinct",
+          "dn_confirmed": 975
+        }
+      }
+    },
+    "PPG0003.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0003_b01": {
+          "d_status": "distinct",
+          "d_confirmed": 71,
+          "dn_confirmed": 66
+        },
+        "PPG0003_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 166
+        },
+        "PPG0003_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 268
+        },
+        "PPG0003_b04": {
+          "d_confirmed": 374,
+          "d_status": "distinct",
+          "dn_confirmed": 366
+        },
+        "PPG0003_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 469
+        },
+        "PPG0003_b06": {
+          "dn_confirmed": 570,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0003_b07": {
+          "d_status": "shoulder",
+          "dn_confirmed": 667,
+          "d_confirmed": null
+        },
+        "PPG0003_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 769
+        },
+        "PPG0003_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 871
+        },
+        "PPG0003_b10": {
+          "d_status": "distinct",
+          "d_confirmed": 981,
+          "dn_confirmed": 971
+        }
+      }
+    },
+    "PPG0002.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "good",
+      "beats": {
+        "PPG0002_b01": {
+          "dn_confirmed": 74,
+          "d_confirmed": 85,
+          "d_status": "distinct"
+        },
+        "PPG0002_b02": {
+          "d_confirmed": 186,
+          "d_status": "distinct",
+          "dn_confirmed": 179
+        },
+        "PPG0002_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 283
+        },
+        "PPG0002_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 390
+        },
+        "PPG0002_b05": {
+          "d_status": "distinct",
+          "d_confirmed": 494,
+          "dn_confirmed": 489
+        },
+        "PPG0002_b06": {
+          "dn_confirmed": 589,
+          "d_confirmed": 597,
+          "d_status": "distinct"
+        },
+        "PPG0002_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 692
+        },
+        "PPG0002_b08": {
+          "d_status": "distinct",
+          "d_confirmed": 797,
+          "dn_confirmed": 791
+        },
+        "PPG0002_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 895
+        },
+        "PPG0002_b10": {
+          "s_reviewed": true
+        }
+      }
+    },
+    "PPG0004.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0004_b01": {
+          "d_confirmed": 82,
+          "d_status": "distinct",
+          "dn_confirmed": 73
+        },
+        "PPG0004_b02": {
+          "d_confirmed": 188,
+          "d_status": "distinct",
+          "dn_confirmed": 178
+        },
+        "PPG0004_b03": {
+          "d_confirmed": 297,
+          "d_status": "distinct",
+          "dn_confirmed": 286
+        },
+        "PPG0004_b04": {
+          "d_confirmed": 399,
+          "d_status": "distinct",
+          "dn_confirmed": 389
+        },
+        "PPG0004_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 500
+        },
+        "PPG0004_b06": {
+          "d_confirmed": 616,
+          "d_status": "distinct",
+          "dn_confirmed": 606
+        },
+        "PPG0004_b07": {
+          "d_confirmed": 718,
+          "d_status": "distinct",
+          "dn_confirmed": 709
+        },
+        "PPG0004_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 821
+        },
+        "PPG0004_b09": {
+          "d_confirmed": 933,
+          "d_status": "distinct",
+          "dn_confirmed": 926
+        }
+      }
+    },
+    "PPG0005.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0005_b01": {
+          "d_status": "distinct",
+          "d_confirmed": 85,
+          "dn_confirmed": 81
+        },
+        "PPG0005_b02": {
+          "d_status": "distinct",
+          "d_confirmed": 190,
+          "dn_confirmed": 185
+        },
+        "PPG0005_b03": {
+          "d_status": "distinct",
+          "d_confirmed": 289,
+          "dn_confirmed": 284
+        },
+        "PPG0005_b04": {
+          "d_confirmed": 398,
+          "d_status": "distinct",
+          "dn_confirmed": 388
+        },
+        "PPG0005_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 493
+        },
+        "PPG0005_b06": {
+          "dn_confirmed": 587,
+          "d_status": "distinct",
+          "d_confirmed": 596
+        },
+        "PPG0005_b07": {
+          "d_confirmed": 696,
+          "d_status": "distinct",
+          "dn_confirmed": 688
+        },
+        "PPG0005_b08": {
+          "d_status": "distinct",
+          "d_confirmed": 796,
+          "dn_confirmed": 790
+        },
+        "PPG0005_b09": {
+          "d_status": "distinct",
+          "d_confirmed": 894,
+          "dn_confirmed": 889
+        },
+        "PPG0005_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 993
+        }
+      }
+    },
+    "PPG0006.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0006_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 37
+        },
+        "PPG0006_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 146
+        },
+        "PPG0006_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 248
+        },
+        "PPG0006_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 348
+        },
+        "PPG0006_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 451
+        },
+        "PPG0006_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 549
+        },
+        "PPG0006_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 653
+        },
+        "PPG0006_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 747
+        },
+        "PPG0006_b09": {
+          "dn_confirmed": 847,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0006_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 948
+        }
+      }
+    },
+    "PPG0007.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0007_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 75
+        },
+        "PPG0007_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 180
+        },
+        "PPG0007_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 276
+        },
+        "PPG0007_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 377
+        },
+        "PPG0007_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 474
+        },
+        "PPG0007_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 571
+        },
+        "PPG0007_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 665
+        },
+        "PPG0007_b08": {
+          "dn_confirmed": 766,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0007_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 861
+        },
+        "PPG0007_b10": {
+          "dn_confirmed": 956,
+          "d_confirmed": 964,
+          "d_status": "distinct"
+        }
+      }
+    },
+    "PPG0008.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0008_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 29
+        },
+        "PPG0008_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 132
+        },
+        "PPG0008_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 232
+        },
+        "PPG0008_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 329
+        },
+        "PPG0008_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 433
+        },
+        "PPG0008_b06": {
+          "dn_confirmed": 539,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0008_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 639
+        },
+        "PPG0008_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 744
+        },
+        "PPG0008_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 848
+        },
+        "PPG0008_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 950
+        }
+      }
+    },
+    "PPG0009.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0009_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 27
+        },
+        "PPG0009_b02": {
+          "d_confirmed": 139,
+          "d_status": "distinct",
+          "dn_confirmed": 129
+        },
+        "PPG0009_b03": {
+          "dn_confirmed": 241,
+          "d_confirmed": 249,
+          "d_status": "distinct"
+        },
+        "PPG0009_b04": {
+          "d_confirmed": 363,
+          "d_status": "distinct",
+          "dn_confirmed": 354
+        },
+        "PPG0009_b05": {
+          "dn_confirmed": 461,
+          "d_confirmed": 468,
+          "d_status": "distinct"
+        },
+        "PPG0009_b06": {
+          "d_status": "distinct",
+          "d_confirmed": 578,
+          "dn_confirmed": 573
+        },
+        "PPG0009_b07": {
+          "d_confirmed": 686,
+          "d_status": "distinct",
+          "dn_confirmed": 678
+        },
+        "PPG0009_b08": {
+          "dn_confirmed": 786,
+          "d_confirmed": 797,
+          "d_status": "distinct"
+        },
+        "PPG0009_b09": {
+          "d_confirmed": 905,
+          "d_status": "distinct",
+          "dn_confirmed": 895
+        },
+        "PPG0009_b10": {}
+      }
+    },
+    "PPG0010.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0010_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 35
+        },
+        "PPG0010_b02": {
+          "dn_confirmed": 139,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0010_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 243
+        },
+        "PPG0010_b04": {
+          "dn_confirmed": 344,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0010_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 444
+        },
+        "PPG0010_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 546
+        },
+        "PPG0010_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 654
+        },
+        "PPG0010_b08": {
+          "dn_confirmed": 755,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0010_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 864
+        },
+        "PPG0010_b10": {
+          "dn_confirmed": 968,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        }
+      }
+    },
+    "PPG0011.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0011_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 81
+        },
+        "PPG0011_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 174
+        },
+        "PPG0011_b03": {
+          "dn_confirmed": 266,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0011_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 358
+        },
+        "PPG0011_b05": {
+          "dn_confirmed": 445,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0011_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 537
+        },
+        "PPG0011_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 623
+        },
+        "PPG0011_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 709
+        },
+        "PPG0011_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 795
+        },
+        "PPG0011_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 883
+        },
+        "PPG0011_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 971
+        }
+      }
+    },
+    "PPG0012.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0012_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 29
+        },
+        "PPG0012_b02": {
+          "dn_confirmed": 115,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0012_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 206
+        },
+        "PPG0012_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 292
+        },
+        "PPG0012_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 378
+        },
+        "PPG0012_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 464
+        },
+        "PPG0012_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 548
+        },
+        "PPG0012_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 635
+        },
+        "PPG0012_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 719
+        },
+        "PPG0012_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 804
+        },
+        "PPG0012_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 890
+        },
+        "PPG0012_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 975
+        }
+      }
+    },
+    "PPG0013.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "good",
+      "beats": {
+        "PPG0013_b01": {
+          "d_status": "distinct",
+          "d_confirmed": 90,
+          "dn_confirmed": 84
+        },
+        "PPG0013_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 169
+        },
+        "PPG0013_b03": {
+          "d_status": "distinct",
+          "d_confirmed": 248,
+          "dn_confirmed": 243
+        },
+        "PPG0013_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 344
+        },
+        "PPG0013_b05": {
+          "d_status": "distinct",
+          "d_confirmed": 429,
+          "dn_confirmed": 425
+        },
+        "PPG0013_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 512
+        },
+        "PPG0013_b07": {
+          "d_status": "distinct",
+          "d_confirmed": 604,
+          "dn_confirmed": 594
+        },
+        "PPG0013_b08": {
+          "d_status": "distinct",
+          "d_confirmed": 684,
+          "dn_confirmed": 678
+        },
+        "PPG0013_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 765
+        },
+        "PPG0013_b10": {
+          "d_status": "distinct",
+          "d_confirmed": 854,
+          "dn_confirmed": 847
+        },
+        "PPG0013_b11": {
+          "d_status": "distinct",
+          "d_confirmed": 935,
+          "dn_confirmed": 928
+        },
+        "PPG0013_b12": {
+          "s_reviewed": true
+        }
+      }
+    },
+    "PPG0014.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0014_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 33
+        },
+        "PPG0014_b02": {
+          "d_status": "distinct",
+          "d_confirmed": 118,
+          "dn_confirmed": 113
+        },
+        "PPG0014_b03": {
+          "d_status": "distinct",
+          "d_confirmed": 198,
+          "dn_confirmed": 191
+        },
+        "PPG0014_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 273
+        },
+        "PPG0014_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 353
+        },
+        "PPG0014_b06": {
+          "d_status": "distinct",
+          "d_confirmed": 441,
+          "dn_confirmed": 435
+        },
+        "PPG0014_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 515
+        },
+        "PPG0014_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 598
+        },
+        "PPG0014_b09": {
+          "d_status": "distinct",
+          "d_confirmed": 684,
+          "dn_confirmed": 678
+        },
+        "PPG0014_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 756
+        },
+        "PPG0014_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 840
+        },
+        "PPG0014_b12": {
+          "d_status": "distinct",
+          "d_confirmed": 926,
+          "dn_confirmed": 920
+        },
+        "PPG0014_b13": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 998,
+          "s_reviewed": true
+        }
+      }
+    },
+    "PPG0015.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0015_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 31
+        },
+        "PPG0015_b02": {
+          "d_status": "distinct",
+          "d_confirmed": 118,
+          "dn_confirmed": 113
+        },
+        "PPG0015_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 194
+        },
+        "PPG0015_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 274
+        },
+        "PPG0015_b05": {
+          "d_status": "distinct",
+          "d_confirmed": 359,
+          "dn_confirmed": 354
+        },
+        "PPG0015_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 432
+        },
+        "PPG0015_b07": {
+          "d_status": "distinct",
+          "d_confirmed": 520,
+          "dn_confirmed": 514
+        },
+        "PPG0015_b08": {
+          "d_confirmed": 602,
+          "d_status": "distinct",
+          "dn_confirmed": 592
+        },
+        "PPG0015_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 675
+        },
+        "PPG0015_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 756
+        },
+        "PPG0015_b11": {
+          "dn_confirmed": 835,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0015_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 915
+        },
+        "PPG0015_b13": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 994
+        }
+      }
+    },
+    "PPG0016.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0016_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 48
+        },
+        "PPG0016_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 127
+        },
+        "PPG0016_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 207
+        },
+        "PPG0016_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 287
+        },
+        "PPG0016_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 365
+        },
+        "PPG0016_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 445
+        },
+        "PPG0016_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 526
+        },
+        "PPG0016_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 606
+        },
+        "PPG0016_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 686
+        },
+        "PPG0016_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 771
+        },
+        "PPG0016_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 850
+        },
+        "PPG0016_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 930
+        },
+        "PPG0016_b13": {
+          "s_reviewed": true,
+          "d_status": "absent",
+          "d_confirmed": null
+        }
+      }
+    },
+    "PPG0017.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0017_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 63
+        },
+        "PPG0017_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 145
+        },
+        "PPG0017_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 222
+        },
+        "PPG0017_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 299
+        },
+        "PPG0017_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 378
+        },
+        "PPG0017_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 454
+        },
+        "PPG0017_b07": {
+          "d_status": "distinct",
+          "d_confirmed": 536,
+          "dn_confirmed": 527
+        },
+        "PPG0017_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 605
+        },
+        "PPG0017_b09": {
+          "dn_confirmed": 680,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0017_b10": {
+          "dn_confirmed": 754,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0017_b11": {
+          "d_status": "distinct",
+          "d_confirmed": 834,
+          "dn_confirmed": 828
+        },
+        "PPG0017_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 905
+        },
+        "PPG0017_b13": {
+          "dn_confirmed": 981,
+          "d_confirmed": 989,
+          "d_status": "distinct"
+        }
+      }
+    },
+    "PPG0018.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0018_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 30
+        },
+        "PPG0018_b02": {
+          "d_status": "distinct",
+          "d_confirmed": 121,
+          "dn_confirmed": 115
+        },
+        "PPG0018_b03": {
+          "d_status": "distinct",
+          "d_confirmed": 204,
+          "dn_confirmed": 198
+        },
+        "PPG0018_b04": {
+          "d_status": "distinct",
+          "d_confirmed": 287,
+          "dn_confirmed": 280
+        },
+        "PPG0018_b05": {
+          "d_status": "distinct",
+          "d_confirmed": 369,
+          "dn_confirmed": 363
+        },
+        "PPG0018_b06": {
+          "d_confirmed": 454,
+          "d_status": "distinct",
+          "dn_confirmed": 443
+        },
+        "PPG0018_b07": {
+          "d_status": "distinct",
+          "d_confirmed": 533,
+          "dn_confirmed": 526
+        },
+        "PPG0018_b08": {
+          "d_confirmed": 618,
+          "d_status": "distinct",
+          "dn_confirmed": 608
+        },
+        "PPG0018_b09": {
+          "d_status": "distinct",
+          "d_confirmed": 693,
+          "dn_confirmed": 689
+        },
+        "PPG0018_b10": {
+          "d_status": "distinct",
+          "d_confirmed": 775,
+          "dn_confirmed": 768
+        },
+        "PPG0018_b11": {
+          "d_status": "distinct",
+          "d_confirmed": 855,
+          "dn_confirmed": 849
+        },
+        "PPG0018_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 927
+        },
+        "PPG0018_b13": {
+          "s_reviewed": true,
+          "d_status": "absent",
+          "d_confirmed": null
+        }
+      }
+    },
+    "PPG0019.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0019_b01": {
+          "d_status": "absent",
+          "d_confirmed": null,
+          "dn_confirmed": 73,
+          "s_reviewed": true
+        },
+        "PPG0019_b02": {
+          "d_status": "distinct",
+          "d_confirmed": 156,
+          "dn_confirmed": 150
+        },
+        "PPG0019_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 226
+        },
+        "PPG0019_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 303
+        },
+        "PPG0019_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 377
+        },
+        "PPG0019_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 450
+        },
+        "PPG0019_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 522
+        },
+        "PPG0019_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 591
+        },
+        "PPG0019_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 663
+        },
+        "PPG0019_b10": {
+          "d_status": "distinct",
+          "d_confirmed": 740,
+          "dn_confirmed": 735
+        },
+        "PPG0019_b11": {
+          "d_confirmed": 815,
+          "d_status": "distinct",
+          "dn_confirmed": 805
+        },
+        "PPG0019_b12": {
+          "d_status": "distinct",
+          "d_confirmed": 885,
+          "dn_confirmed": 878
+        },
+        "PPG0019_b13": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 950
+        }
+      }
+    },
+    "PPG0020.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0020_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 52
+        },
+        "PPG0020_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 133
+        },
+        "PPG0020_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 219
+        },
+        "PPG0020_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 299
+        },
+        "PPG0020_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 381
+        },
+        "PPG0020_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 466
+        },
+        "PPG0020_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 549
+        },
+        "PPG0020_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 629
+        },
+        "PPG0020_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 712
+        },
+        "PPG0020_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 794
+        },
+        "PPG0020_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 872
+        },
+        "PPG0020_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 952
+        }
+      }
+    },
+    "PPG0021.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0021_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 62
+        },
+        "PPG0021_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 140
+        },
+        "PPG0021_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 218
+        },
+        "PPG0021_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 297
+        },
+        "PPG0021_b05": {
+          "dn_confirmed": 461,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0021_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 461
+        },
+        "PPG0021_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 544
+        },
+        "PPG0021_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 624
+        },
+        "PPG0021_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 707
+        },
+        "PPG0021_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 788
+        },
+        "PPG0021_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 868
+        },
+        "PPG0021_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 950
+        }
+      }
+    },
+    "PPG0022.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0022_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 31
+        },
+        "PPG0022_b02": {
+          "d_confirmed": 116,
+          "d_status": "distinct",
+          "dn_confirmed": 107
+        },
+        "PPG0022_b03": {
+          "d_confirmed": 197,
+          "d_status": "distinct",
+          "dn_confirmed": 189
+        },
+        "PPG0022_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 274
+        },
+        "PPG0022_b05": {
+          "dn_confirmed": 355,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0022_b06": {
+          "dn_confirmed": 436,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0022_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 518
+        },
+        "PPG0022_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 598
+        },
+        "PPG0022_b09": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 680
+        },
+        "PPG0022_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 761
+        },
+        "PPG0022_b11": {
+          "dn_confirmed": 844,
+          "d_status": "shoulder",
+          "d_confirmed": null
+        },
+        "PPG0022_b12": {
+          "d_confirmed": 930,
+          "d_status": "distinct",
+          "dn_confirmed": 922
+        },
+        "PPG0022_b13": {
+          "s_reviewed": true,
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 1000
+        }
+      }
+    },
+    "PPG0023.CSV": {
+      "hand": "",
+      "finger": "",
+      "quality": "not_reviewed",
+      "beats": {
+        "PPG0023_b01": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 24
+        },
+        "PPG0023_b02": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 105
+        },
+        "PPG0023_b03": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 185
+        },
+        "PPG0023_b04": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 267
+        },
+        "PPG0023_b05": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 351
+        },
+        "PPG0023_b06": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 432
+        },
+        "PPG0023_b07": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 516
+        },
+        "PPG0023_b08": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 599
+        },
+        "PPG0023_b09": {
+          "d_confirmed": 682,
+          "d_status": "distinct",
+          "dn_confirmed": 675
+        },
+        "PPG0023_b10": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 757
+        },
+        "PPG0023_b11": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 835
+        },
+        "PPG0023_b12": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 915
+        },
+        "PPG0023_b13": {
+          "d_status": "shoulder",
+          "d_confirmed": null,
+          "dn_confirmed": 992
+        }
+      }
+    }
+  },
+  "notes": "Auto proposals are not manually verified unless explicitly marked in decisions."
+}

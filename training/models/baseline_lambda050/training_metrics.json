@@ -1,0 +1,218 @@
+{
+  "experiment": "v15_negative_aware_plus_cross_class_exclusion",
+  "overlap_lambda": 0.5,
+  "guard_samples": 8,
+  "train_fingerprints": {
+    "train_X_sha256": "627f3be32ecec3b87a541794c8447958ac57b93396543b31d18ed0ac2fd1c90c",
+    "train_Y_sha256": "ab30db32fb866f95cd2b9059622bc89174db672cea4a15400c2e0ac08937349b",
+    "val_X_sha256": "9ff280c6caa3cf92a2e76003ae4fcd87a04971fa2f3db85a0f16f6b2c3b2f8a7",
+    "val_Y_sha256": "655d9a9141a8636fcd3be1028dd00405ca51e27508acb2795de8182aafb0545d"
+  },
+  "original_fp32_validation": {
+    "total": 0.6672590687793368,
+    "bce": 0.6268275843809048,
+    "overlap": 0.08086296879686415
+  },
+  "final_fp32_validation": {
+    "total": 0.5803345384759208,
+    "bce": 0.5621492636948824,
+    "overlap": 0.03637054956207673
+  },
+  "initial_qat_validation": {
+    "total": 0.5823377726467637,
+    "bce": 0.563132818924884,
+    "overlap": 0.03840990744375934
+  },
+  "final_qat_validation": {
+    "total": 0.5780654694015781,
+    "bce": 0.5610134480210642,
+    "overlap": 0.03410404276102781
+  },
+  "train_windows": 1800,
+  "val_windows": 600,
+  "cases_train": {
+    "dual": 600,
+    "weak": 465,
+    "systolic_only": 525,
+    "noise_only": 210
+  },
+  "cases_val": {
+    "dual": 195,
+    "weak": 135,
+    "systolic_only": 195,
+    "noise_only": 75
+  },
+  "real_unlabelled_calibration_windows": 0,
+  "training_history": [
+    {
+      "stage": "FP32",
+      "epoch": 1,
+      "train_objective": 0.6482319902049171,
+      "val_objective": 0.61045829199953,
+      "val_bce": 0.5867653058903912,
+      "val_overlap": 0.047385972218277554,
+      "by_case": {
+        "dual": 0.78282,
+        "weak": 0.78173,
+        "systolic_only": 0.39053,
+        "noise_only": 0.23631
+      }
+    },
+    {
+      "stage": "FP32",
+      "epoch": 2,
+      "train_objective": 0.6237122164832221,
+      "val_objective": 0.5990197426018616,
+      "val_bce": 0.5762015275595089,
+      "val_overlap": 0.04563643008470535,
+      "by_case": {
+        "dual": 0.77665,
+        "weak": 0.77505,
+        "systolic_only": 0.38086,
+        "noise_only": 0.205
+      }
+    },
+    {
+      "stage": "FP32",
+      "epoch": 3,
+      "train_objective": 0.6139436573452419,
+      "val_objective": 0.5912790603807662,
+      "val_bce": 0.5709276472280422,
+      "val_overlap": 0.04070282630544777,
+      "by_case": {
+        "dual": 0.78156,
+        "weak": 0.78304,
+        "systolic_only": 0.36603,
+        "noise_only": 0.17422
+      }
+    },
+    {
+      "stage": "FP32",
+      "epoch": 4,
+      "train_objective": 0.6074787558449639,
+      "val_objective": 0.5859786631322156,
+      "val_bce": 0.5663139886098604,
+      "val_overlap": 0.039329349044710395,
+      "by_case": {
+        "dual": 0.77802,
+        "weak": 0.77688,
+        "systolic_only": 0.36324,
+        "noise_only": 0.16486
+      }
+    },
+    {
+      "stage": "FP32",
+      "epoch": 5,
+      "train_objective": 0.6026941479576958,
+      "val_objective": 0.5832180909758123,
+      "val_bce": 0.5654498207134505,
+      "val_overlap": 0.03553654052472363,
+      "by_case": {
+        "dual": 0.78554,
+        "weak": 0.78785,
+        "systolic_only": 0.35296,
+        "noise_only": 0.14537
+      }
+    },
+    {
+      "stage": "FP32",
+      "epoch": 6,
+      "train_objective": 0.5989288877116309,
+      "val_objective": 0.5803345384759208,
+      "val_bce": 0.5621492636948824,
+      "val_overlap": 0.03637054956207673,
+      "by_case": {
+        "dual": 0.78084,
+        "weak": 0.78134,
+        "systolic_only": 0.35382,
+        "noise_only": 0.14066
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 1,
+      "train_objective": 0.5994696034325494,
+      "val_objective": 0.5818334045202936,
+      "val_bce": 0.5647665517466763,
+      "val_overlap": 0.03413370554723467,
+      "by_case": {
+        "dual": 0.78958,
+        "weak": 0.7899,
+        "systolic_only": 0.35073,
+        "noise_only": 0.13152
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 2,
+      "train_objective": 0.5981455236011082,
+      "val_objective": 0.5814979174220934,
+      "val_bce": 0.5637277435138821,
+      "val_overlap": 0.03554034781642258,
+      "by_case": {
+        "dual": 0.78549,
+        "weak": 0.78712,
+        "systolic_only": 0.35291,
+        "noise_only": 0.13317
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 3,
+      "train_objective": 0.5967829304271274,
+      "val_objective": 0.579770127130129,
+      "val_bce": 0.5619504482299089,
+      "val_overlap": 0.035639357800440245,
+      "by_case": {
+        "dual": 0.782,
+        "weak": 0.78382,
+        "systolic_only": 0.35353,
+        "noise_only": 0.13235
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 4,
+      "train_objective": 0.5956860197914972,
+      "val_objective": 0.5784873825214647,
+      "val_bce": 0.5611685002719362,
+      "val_overlap": 0.03463776449905708,
+      "by_case": {
+        "dual": 0.78296,
+        "weak": 0.78409,
+        "systolic_only": 0.35129,
+        "noise_only": 0.12894
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 5,
+      "train_objective": 0.5950962384541829,
+      "val_objective": 0.5780654694015781,
+      "val_bce": 0.5610134480210642,
+      "val_overlap": 0.03410404276102781,
+      "by_case": {
+        "dual": 0.78377,
+        "weak": 0.78693,
+        "systolic_only": 0.34948,
+        "noise_only": 0.12518
+      }
+    },
+    {
+      "stage": "QAT",
+      "epoch": 6,
+      "train_objective": 0.5940702165497674,
+      "val_objective": 0.5782943129477401,
+      "val_bce": 0.5613757361471653,
+      "val_overlap": 0.033837153601149715,
+      "by_case": {
+        "dual": 0.78525,
+        "weak": 0.7877,
+        "systolic_only": 0.34947,
+        "noise_only": 0.12288
+      }
+    }
+  ],
+  "original_testvector_fp32_error": 4.470348358154297e-07,
+  "caution": "D is the generator second Gaussian center, not adjudicated physiological diastolic peak"
+}
